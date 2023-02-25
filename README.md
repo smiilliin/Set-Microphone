@@ -1,4 +1,4 @@
-# Set Microphone - Set default device of microphone
+# Set-Microphone - Set default device of microphone
 
 ## Usage
 
