@@ -3,7 +3,7 @@
 #include <fstream>
 #include <string>
 #include <functiondiscoverykeys.h>
-#include <sys/stat.h>
+#include <direct.h>
 
 #include "PolicyConfig.h"
 
@@ -41,7 +41,7 @@ void Log(wstring log) {
 }
 #define ThrowError(err) \
 { \
-	Log(L"[Error line" + to_wstring(__LINE__) + + L" " + err + L"] "); \
+	Log(L"[Error line" + to_wstring(__LINE__) + + L" " + err + L"]"); \
 	Sleep(1000); \
 	errorCount++; \
 	if (errorCount > 50) { \
@@ -60,9 +60,32 @@ int WINAPI WinMain(
 	_In_ LPSTR lpCmdLine,
 	_In_ int nShowCmd
 ) {
-	logFile.open("log.txt");
+	char* appData;
+	size_t len;
+	errno_t err = _dupenv_s(&appData, &len, "APPDATA");
+
+	if (err != 0 || appData == nullptr) {
+		return MessageBoxW(nullptr, L"[Error] Cannot load appdata folder", L"SetMicrophone Error", MB_ICONERROR);
+	}
+	string appDataDir = string(appData) + "\\SetMicrophone";
+	
+	struct stat info;
+
+	if (stat(appDataDir.c_str(), &info) != 0) {
+		if (_mkdir(appDataDir.c_str()) != 0) {
+			return MessageBoxW(nullptr, L"[Error] Cannot create a folder setMicrophone", L"SetMicrophone Error", MB_ICONERROR);
+		}
+	}
+	else {
+		if (!(info.st_mode & S_IFDIR)) {
+			return MessageBoxW(nullptr, L"[Error] SetMicrophone is not a folder", L"SetMicrophone Error", MB_ICONERROR);
+		}
+	}
+
+	logFile.open(string(appDataDir) + "\\log.txt");
+
 main:
-	wifstream toFindDeviceNameFile("device.txt");
+	wifstream toFindDeviceNameFile(string(appDataDir) + "\\device.txt");
 
 	if (!toFindDeviceNameFile.is_open()) ThrowError(L"The device file cannot be opened");
 
