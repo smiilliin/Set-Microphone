@@ -40,18 +40,18 @@ void Log(wstring log) {
 	logFile << log << endl;
 }
 #define ThrowError(err) \
-						{ \
-							Log(L"[Error line" + to_wstring(__LINE__) + + L" " + err + L"] "); \
-							Sleep(1000); \
-							errorCount++; \
-							if (errorCount > 50) { \
-								logFile.close(); \
-								exit(1); \
-							} \
-							else { \
-								goto main; \
-							} \
-						}
+{ \
+	Log(L"[Error line" + to_wstring(__LINE__) + + L" " + err + L"] "); \
+	Sleep(1000); \
+	errorCount++; \
+	if (errorCount > 50) { \
+		logFile.close(); \
+		exit(1); \
+	} \
+	else { \
+		goto main; \
+	} \
+}
 
 
 int WINAPI WinMain(
@@ -60,22 +60,9 @@ int WINAPI WinMain(
 	LPSTR lpCmdLine,
 	int nShowCmd
 ) {
-	struct stat info;
-
-	if (stat("SetMicrophone", &info) != 0) {
-		if (_wmkdir(L"SetMicrophone") != 0) {
-			return MessageBoxW(nullptr, L"[Error] Cannot create a folder setMicrophone", L"SetMicrophone Error", MB_ICONERROR);
-		}
-	}
-	else {
-		if (!(info.st_mode & S_IFDIR)) {
-			return MessageBoxW(nullptr, L"[Error] SetMicrophone is not a folder", L"SetMicrophone Error", MB_ICONERROR);
-		}
-	}
-
-	logFile.open("SetMicrophone\\log.txt");
+	logFile.open("log.txt");
 main:
-	wifstream toFindDeviceNameFile("SetMicrophone\\device.txt");
+	wifstream toFindDeviceNameFile("device.txt");
 
 	if (!toFindDeviceNameFile.is_open()) ThrowError(L"The device file cannot be opened");
 
